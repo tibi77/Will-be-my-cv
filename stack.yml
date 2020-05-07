@@ -1,0 +1,52 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - ./data/mongodb/:/data/db
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+
+  cadvisor:
+    image: google/cadvisor:latest
+    volumes:
+      - /:/rootfs
+      - /var/run:/var/run
+      - /sys:/sys
+      - /var/lib/docker/:/var/lib/docker
+      - /dev/disk/:/dev/disk
+    ports:
+      - 8080:8080
+
+  backend:
+    image: server-docker
+    command: npm run start
+    ports:
+      - 8083:8083
+
+  client:
+    image: react-docker2
+    depends_on:
+      - backend
+    links:
+      - backend
+    ports:
+      - 8085:80
+  admin:
+    image: admin-docker
+    depends_on:
+      - backend
+    links:
+      - backend
+    ports:
+      - 8010:80
